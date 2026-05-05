@@ -1,24 +1,32 @@
-
 import admin from 'firebase-admin';
 
-if (!admin.apps.length) {
-  // Use a fallback to empty string to avoid undefined errors
-  const rawKey = process.env.FIREBASE_PRIVATE_KEY || '';
-  
-  // This version handles double-quotes, literal \n, and accidental spaces
-  const formattedKey = rawKey
-    .replace(/^["']|["']$/g, '') // Removes surrounding quotes
-    .replace(/\\n/g, '\n')       // Converts string "\n" to real newlines
-    .trim();
+// 1. Check if we have the minimum required data before attempting to init
+const projectId = process.env.FIREBASE_PROJECT_ID;
+const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+const rawKey = process.env.FIREBASE_PRIVATE_KEY || '';
 
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: formattedKey,
-    }),
-  });
+if (!admin.apps.length) {
+  // ONLY initialize if we actually have a Project ID. 
+  // This prevents the build crash.
+  if (projectId) {
+    const formattedKey = rawKey
+      .replace(/^["']|["']$/g, '')
+      .replace(/\\n/g, '\n')
+      .trim();
+
+    admin.initializeApp({
+      credential: admin.credential.cert({
+        projectId: projectId,
+        clientEmail: clientEmail,
+        privateKey: formattedKey,
+      }),
+    });
+  } else {
+    // This will show up in your build logs to help you debug
+    console.warn("Firebase Admin: Project ID is missing. Skipping initialization during build.");
+  }
 }
 
-export const db = admin.firestore();
-export const auth = admin.auth();
+// 2. Export with a check so the build doesn't crash on the export either
+export const db = admin.apps.length ? admin.firestore() : null;
+export const auth = admin.apps.length ? admin.auth() : null;
