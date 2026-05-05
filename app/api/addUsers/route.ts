@@ -40,7 +40,7 @@ export async function POST(request: Request) {
     };
 
     // 3. Store in Firestore
-    const docRef = await db!.collection('users').add(newUser);
+    const docRef = await db.collection('users').add(newUser);
 
     return NextResponse.json({ 
       success: true, 
