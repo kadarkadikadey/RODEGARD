@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     }
 
     // 2. Add to Firestore 'bookings' collection
-    const docRef = await db.collection('serviceRequest').add({
+    const docRef = await db!.collection('serviceRequest').add({
       username,
       email,
       carModel,
