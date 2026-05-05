@@ -28,5 +28,5 @@ if (!admin.apps.length) {
 }
 
 // 2. Export with a check so the build doesn't crash on the export either
-export const db = admin.apps.length ? admin.firestore() : null;
+export const db = admin.firestore();
 export const auth = admin.apps.length ? admin.auth() : null;
